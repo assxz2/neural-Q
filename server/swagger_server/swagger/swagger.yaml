@@ -1,0 +1,891 @@
+openapi: 3.0.0
+info:
+  title: "rouran API"
+  description: nq
+  version: v1
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+- url: https://virtserver.swaggerhub.com/v1
+  description: SwaggerHub API Auto Mocking
+tags:
+- name: project
+  description: Everything about rouran services
+- name: label
+  description: Access to label
+- name: inference
+  description: Access to inference
+- name: learning
+  description: Everything about learning procedure
+- name: user
+  description: Operations about user
+  externalDocs:
+    description: Find out more about our project
+    url: http://swagger.io
+paths:
+  /project:
+    post:
+      tags:
+      - project
+      summary: Create a project by given parameters
+      operationId: create_project
+      requestBody:
+        $ref: '#/components/requestBodies/Project'
+      responses:
+        "201":
+          description: Project Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_201'
+        "400":
+          description: Invalid parameters supplid
+        "404":
+          description: Can't create current project
+        "405":
+          description: Validation exception
+      x-openapi-router-controller: swagger_server.controllers.project_controller
+  /project/fileTree:
+    get:
+      tags:
+      - project
+      summary: get file tree from current dir
+      operationId: file_tree_show
+      parameters:
+      - name: location
+        in: query
+        description: Name of project to add
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileTree'
+      x-openapi-router-controller: swagger_server.controllers.project_controller
+  /label/rectangle:
+    post:
+      tags:
+      - label
+      summary: Add the annotation to frame
+      description: Add a annotation to frame
+      operationId: submit_rectangle
+      parameters:
+      - name: projectName
+        in: query
+        description: Name of project to add
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: userName
+        in: query
+        description: Name of user
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: sampleName
+        in: query
+        description: Name of frame to add
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Rectangle'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+                x-content-type: application/json
+      security:
+      - api_key: []
+      x-openapi-router-controller: swagger_server.controllers.label_controller
+  /label/skeleton:
+    put:
+      tags:
+      - label
+      summary: Add the annotation to frame
+      description: Add a annotation to frame
+      operationId: update_skeleton
+      parameters:
+      - name: projectName
+        in: query
+        description: Name of project to add
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: userName
+        in: query
+        description: Name of user
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: sampleName
+        in: query
+        description: Name of frame to add
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: regionName
+        in: query
+        description: Target ROI name for current skeleton
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      requestBody:
+        $ref: '#/components/requestBodies/File'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+                x-content-type: application/json
+      security:
+      - api_key: []
+      x-openapi-router-controller: swagger_server.controllers.label_controller
+    post:
+      tags:
+      - label
+      summary: Add the skeletons collection file to sample or sample clip
+      description: Add a annotation to frame
+      operationId: submit_skeleton
+      parameters:
+      - name: projectName
+        in: query
+        description: Name of project to add
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: username
+        in: query
+        description: Name of user
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: sampleName
+        in: query
+        description: Name of frame to add
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: regionName
+        in: query
+        description: Target ROI name for current skeleton
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      requestBody:
+        $ref: '#/components/requestBodies/File'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+                x-content-type: application/json
+
+      x-openapi-router-controller: swagger_server.controllers.label_controller
+  /learning/landmark:
+    post:
+      tags:
+      - learning
+      summary: Create a landmark learning procedure
+      operationId: learning_landmark
+      parameters:
+      - name: projectName
+        in: query
+        description: Name of specific project
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: username
+        in: query
+        description: Username
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: sampleName
+        in: query
+        description: Name of specific sample
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: regionName
+        in: query
+        description: Name of specific Annotation Region of Interest
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LearningStrategy'
+      responses:
+        "202":
+          description: submit inference task
+        "303":
+          description: Redirects to created result URL
+        "400":
+          description: Invalid parameters supplid
+        "404":
+          description: Can't create current project
+        "405":
+          description: Validation exception
+      x-openapi-router-controller: swagger_server.controllers.learning_controller
+
+
+  /inference/tracking:
+    get:
+      tags:
+      - inference
+      summary: Inference a specific ROI sequence for submitted ROI and sample and
+        return the resouces uri
+      operationId: inference_tracking_status
+      parameters:
+      - name: Uri
+        in: query
+        description: URI for specific node
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "202":
+          description: Submit inference task
+        "303":
+          description: Redirects to created result URL
+        "400":
+          description: Invalid parameters supplid
+        "404":
+          description: Can't create current project
+        "405":
+          description: Validation exception
+      x-openapi-router-controller: swagger_server.controllers.inference_controller
+    post:
+      tags:
+      - inference
+      summary: Inference a specific ROI sequence for submitted ROI and sample and
+        return the resouces uri
+      operationId: inference_tracking
+      parameters:
+      - name: projectName
+        in: query
+        description: Name of specific project
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: username
+        in: query
+        description: Name of specific user
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: sampleName
+        in: query
+        description: Name of specific sample
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Rectangle'
+      responses:
+        "202":
+          description: Submit inference task
+        "303":
+          description: Redirects to created result URL
+        "400":
+          description: Invalid parameters supplid
+        "404":
+          description: Can't create current project
+        "405":
+          description: Validation exception
+      x-openapi-router-controller: swagger_server.controllers.inference_controller
+  /inference/landmark:
+    get:
+      tags:
+      - inference
+      summary: Inference a specific ROI sequence for submitted ROI and sample and
+        return the resouces uri
+      operationId: inference_landmark_status
+      parameters:
+      - name: Uri
+        in: query
+        description: URI for specific node
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "202":
+          description: Submit inference task
+        "303":
+          description: Redirects to created result URL
+        "400":
+          description: Invalid parameters supplid
+        "404":
+          description: Can't create current project
+        "405":
+          description: Validation exception
+      x-openapi-router-controller: swagger_server.controllers.inference_controller
+    post:
+      tags:
+      - inference
+      summary: Return a specific region inference
+      description: Get a specific frame inference results
+      operationId: inference_landmark
+      parameters:
+      - name: projectName
+        in: query
+        description: Name of specific project
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: username
+        in: query
+        description: Username
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: sampleName
+        in: query
+        description: Name of specific sample
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: regionName
+        in: query
+        description: Name of specific region for specific sample which is generated
+          by tracking algorithm
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+        "206":
+          description: Handling
+        "303":
+          description: Redirect to created result uri
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Sample not found
+      x-openapi-router-controller: swagger_server.controllers.inference_controller
+  /inference/analyse:
+    get:
+      tags:
+        - inference
+      summary: Inference analyse status
+      operationId: inference_analyse_status
+      parameters:
+      - name: Uri
+        in: query
+        description: URI for specific node
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "202":
+          description: Submit inference task
+        "303":
+          description: Redirects to created result URL
+        "400":
+          description: Invalid parameters supplid
+        "404":
+          description: Can't create current project
+        "405":
+          description: Validation exception
+      x-openapi-router-controller: swagger_server.controllers.inference_controller
+    post:
+      tags:
+        - inference
+      summary: return analysed csv and pdf path
+      description: upload modified csv to generate signal lines
+      operationId: inference_analyse
+      parameters:
+        - name: projectName
+          in: query
+          description: Name of project to add
+          required: true
+          schema:
+            type: string
+        - name: username
+          in: query
+          description: Name of user
+          required: true
+          schema:
+            type: string
+        - name: sampleName
+          in: query
+          description: Name of frame to add
+          required: true
+          schema:
+            type: string
+        - name: regionName
+          in: query
+          description: Target ROI name for current skeleton
+          required: true
+          schema:
+            type: string
+      requestBody:
+        $ref: '#/components/requestBodies/File'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: failed operation
+      x-openapi-router-controller: swagger_server.controllers.inference_controller
+  /user:
+    post:
+      tags:
+      - user
+      summary: Create user
+      description: This can only be done by the logged in user.
+      operationId: create_user
+      requestBody:
+        description: Created user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        default:
+          description: successful operation
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+  /user/login:
+    post:
+      tags:
+      - user
+      summary: Logs user into the system
+      operationId: login_user
+      parameters:
+      - name: username
+        in: query
+        description: The user name for login
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: password
+        in: query
+        description: The password for login in clear text
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              style: simple
+              explode: false
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              style: simple
+              explode: false
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                type: string
+                x-content-type: application/json
+        "400":
+          description: Invalid username/password supplied
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+  /user/logout:
+    get:
+      tags:
+      - user
+      summary: Logs out current logged in user session
+      operationId: logout_user
+      responses:
+        default:
+          description: successful operation
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+  /user/{username}:
+    get:
+      tags:
+      - user
+      summary: Get user by user name
+      operationId: get_user_by_name
+      parameters:
+      - name: username
+        in: path
+        description: The name that needs to be fetched. Use user1 for testing.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: Invalid username supplied
+        "404":
+          description: User not found
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+    put:
+      tags:
+      - user
+      summary: Updated user
+      description: This can only be done by the logged in user.
+      operationId: update_user
+      parameters:
+      - name: username
+        in: path
+        description: name that need to be updated
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Updated user object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        "400":
+          description: Invalid user supplied
+        "404":
+          description: User not found
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+    delete:
+      tags:
+      - user
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: delete_user
+      parameters:
+      - name: username
+        in: path
+        description: The name that needs to be deleted
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Invalid username supplied
+        "404":
+          description: User not found
+      x-openapi-router-controller: swagger_server.controllers.user_controller
+  /queue/{taskId}:
+    get:
+      tags:
+      - queue
+      summary: Get task information in queue
+      operationId: queue_task_id_get
+      parameters:
+      - name: taskId
+        in: path
+        description: The ID that needs to be queried
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "400":
+          description: Invalid task ID supplied
+        "404":
+          description: Task Not Found
+      x-openapi-router-controller: swagger_server.controllers.queue_controller
+components:
+  schemas:
+    Rectangle:
+      type: object
+      properties:
+        name:
+          type: string
+        topLeftX:
+          type: integer
+          format: int32
+        topLeftY:
+          type: integer
+          format: int32
+        bottomRightX:
+          type: integer
+          format: int32
+        bottomRightY:
+          type: integer
+          format: int32
+    Point:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        x:
+          type: integer
+          format: int32
+        y:
+          type: integer
+          format: int32
+    Skeleton:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        landmarks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Point'
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        phone:
+          type: string
+        userStatus:
+          type: integer
+          description: User Status
+          format: int32
+      example:
+        firstName: firstName
+        lastName: lastName
+        password: password
+        userStatus: 0
+        phone: phone
+        email: email
+        username: username
+    Project:
+      required:
+      - authorName
+      - name
+      - remarkText
+      - sampleUrls
+      type: object
+      properties:
+        name:
+          type: string
+          example: Motion-Analysis
+        authorName:
+          type: string
+          example: Bill
+        sampleUrls:
+          type: array
+          items:
+            type: string
+        remarkText:
+          type: string
+          example: No remark to provide
+    FileTree:
+      required:
+      - dir
+      type: object
+      properties:
+        dir:
+          type: array
+          example: /data
+          items:
+            type: string
+      example:
+        dir: /data
+    LearningStrategy:
+      type: object
+      properties:
+        name:
+          type: string
+        iteration:
+          type: integer
+          format: int32
+        backbone:
+          type: string
+    inline_response_201:
+      type: object
+      properties:
+        name:
+          type: string
+        samples:
+          type: array
+          items:
+            type: string
+      example:
+        name: name
+        samples:
+        - samples
+        - samples
+  responses:
+    "404NotFound":
+      description: The specified resource was not found.
+    ImageResponse:
+      description: An image.
+      content:
+        image/*:
+          schema:
+            type: string
+            format: binary
+    Project:
+      description: Project Response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/inline_response_201'
+  requestBodies:
+    File:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              fileName:
+                type: string
+                format: binary
+    Project:
+      description: Project object that needs to be added to the cloud
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Project'
+      required: true
+    Skeleton:
+      description: Skeleton annotation add to specific frame
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Skeleton'
+      required: true
+    Rectangle:
+      description: Rectangle annotation add to specific frame
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Rectangle'
+      required: true
+    UserArray:
+      description: List of user object
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/User'
+      required: true
+    LearningStrategy:
+      description: User defined learning strategy for learning
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LearningStrategy'
+      required: false
+  securitySchemes:
+    videoproject_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: http://videoproject.swagger.io/oauth/dialog
+          scopes:
+            write:videos: modify videos in your account
+            read:videos: read your videos
+      x-tokenInfoFunc: swagger_server.controllers.authorization_controller.check_videoproject_auth
+      x-scopeValidateFunc: swagger_server.controllers.authorization_controller.validate_scope_videoproject_auth
+    api_key:
+      type: apiKey
+      name: api_key
+      in: header
+      x-apikeyInfoFunc: swagger_server.controllers.authorization_controller.check_api_key
+

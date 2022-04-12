@@ -1,0 +1,40 @@
+# Project definitions (do not edit)
+Task: Tracing
+scorer: Bill
+date: Jul15
+
+# Project path (change when moving around)
+project_path: WILL BE AUTOMATICALLY UPDATED BY DEMO CODE
+
+# Annotation data set configuration (and individual video cropping parameters)
+video_sets:
+  WILL BE AUTOMATICALLY UPDATED BY DEMO CODE:
+    crop: video.csv
+transforms_path: WILL BE AUTOMATICALLY UPDATE BY CODE
+
+bodyparts:
+- A
+start: 0
+stop: 1
+numframes2pick: 20
+
+# Plotting configuration
+pcutoff: 0.4
+dotsize: 12
+alphavalue: 0.7
+colormap: jet
+
+
+# Training,Evaluation and Analysis configuration
+TrainingFraction:
+- 0.95
+iteration: 0
+net: hrnetv2_18
+snapshotindex: -1
+batch_size: 16
+
+# Refinement configuration (parameters from annotation dataset configuration also relevant in this stage)
+corner2move2:
+- 50
+- 50
+move2corner: true

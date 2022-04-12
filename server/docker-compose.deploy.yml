@@ -1,0 +1,134 @@
+version: "3"
+
+services:
+    neo4j:
+        env_file:
+            - ".env"
+        environment:
+            - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+            - NEO4J_apoc_import_file_enabled=true
+            - NEO4J_dbms_shell_enabled=true
+        image: neo4j:latest
+        hostname: neo4j
+        restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+        stop_grace_period: "${DOCKER_STOP_GRACE_PERIOD:-3s}"
+        volumes:
+            - ./neo4j/plugins:/plugins
+            - ./neo4j/data:/data
+            - ./neo4j/import:/import
+        ports:
+            - "7474:7474"
+            - "7687:7687"
+
+    redis:
+        env_file:
+            - ".env"
+        image: redis:latest
+        hostname: redis
+        restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+        stop_grace_period: "${DOCKER_STOP_GRACE_PERIOD:-3s}"
+        command: redis-server /usr/local/etc/redis/redis.conf
+        volumes:
+            - "./redis.conf:/usr/local/etc/redis/redis.conf"
+            - "./redis_data:/data"
+
+    rabbit:
+        hostname: rabbit
+        image: rabbitmq:management
+        environment:
+          - RABBITMQ_DEFAULT_USER=rabbitmq
+          - RABBITMQ_DEFAULT_PASS=rabbitmq
+        ports:
+          - "5673:5672"
+          - "15672:15672"
+
+    file_dataset:
+        env_file:
+            - ".env"
+        image: svenstaro/miniserve:latest
+        hostname: file_dataset
+        command: ["--auth", "rouran:rouran2020", "-t", "rouran Data Server", "/data"]
+        restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+        stop_grace_period: "${DOCKER_STOP_GRACE_PERIOD:-3s}"
+        volumes:
+            - "${DOCKER_WEB_DATA:-./running_dataset:/data}"
+        ports:
+            - "8080:8080"
+
+    file_workspace:
+        env_file:
+            - ".env"
+        image: svenstaro/miniserve:latest
+        hostname: file_workspace
+        command: ["--auth", "rouran:rouran2020", "-t", "rouran Work Server", "/workspace"]
+        restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+        stop_grace_period: "${DOCKER_STOP_GRACE_PERIOD:-3s}"
+        volumes:
+            - "${DOCKER_WEB_WORKSPACE:-./running_workspace:/workspace}"
+        ports:
+            - "8090:8080"
+
+    api:
+        image: registry.cn-hangzhou.aliyuncs.com/lccurious/rouran:latest
+        runtime: nvidia
+        command: python -m swagger_server
+        depends_on:
+            - neo4j
+            - rabbit
+            - redis
+        links:
+            - rabbit
+            - redis
+            - neo4j
+        env_file:
+            - ".env"
+        healthcheck:
+            test: "${DOCKER_HEALTHCHECK_TEST:-curl localhost:2020/healthy}"
+            interval: "60s"
+            timeout: "3s"
+            start_period: "5s"
+            retries: 3
+        ports:
+            - "2020:2020"
+        restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+        stop_grace_period: "${DOCKER_STOP_GRACE_PERIOD:-3s}"
+        volumes:
+            - "${DOCKER_WEB_WORKSPACE:-/4T/rouran_workspace:/app/workspace}"
+            - "${DOCKER_WEB_DATA:-/4T/SHARE/dataset/rouran:/data}"
+
+    worker:
+        image: registry.cn-hangzhou.aliyuncs.com/lccurious/rouran:latest
+        runtime: nvidia
+        command: celery -A swagger_server:celery_app worker -l info -E
+        depends_on:
+            - neo4j
+            - rabbit
+            - redis
+        links:
+            - rabbit
+            - redis
+            - neo4j
+        env_file:
+            - ".env"
+        restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+        stop_grace_period: "${DOCKER_STOP_GRACE_PERIOD:-3s}"
+        volumes:
+            - "${DOCKER_WEB_WORKSPACE:-/4T/rouran_workspace:/app/workspace}"
+            - "${DOCKER_WEB_DATA:-/4T/SHARE/dataset/rouran:/data}"
+
+    flower:
+        hostname: flower
+        image: mher/flower:0.9.5
+        restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+        command: [ "flower", "--broker=redis://redis:6379/0", "--port=5555" ]
+        depends_on:
+            - worker
+            - api
+        links:
+            - worker
+            - api
+        ports:
+            - "5555:5555"
+
+volumes:
+    redis: {}
